@@ -1,17 +1,43 @@
+# 
+# Required imports UPNSuffix.txt and Accounts.txt
+# 
+
 
 Param(
     [switch]$TranscriptOn
 )
 
+# User ActiveDirectory
+$Check = Get-Command -Module ActiveDirectory
+If ($Check -eq $null){
+    Write-Output "Error: Active Directory PowerShell module is not installed on this machine"
+    Exit
+} else {
+    Import-Module ActiveDirectory
+}
+
 
 # check allowed UPN suffix, commandline multivalued
-$UPNSuffixes = Import-CSV -Path "UPSuffix.txt"
+$UPNSuffixes = Import-CSV -Path "UPNSuffix.txt"
+ForEach ($UPNSuffix in $UPNSuffixes) {
+    Write-Output "Checking $UPNSuffix"
+}
+
+
 
 # Import CSV with accounts, column SamAccountname
+$Accounts = Import-CSV -Path "Accounts.txt"
+
 # Export current account settings (backup)
 #   Current UPN, SamAccountname, PrimaryMail
+ForEach ($Account in $Accounts){
+    
+    Get-ADUser -Identity $Account -Properties 'ProxyAddresses'
+
 
 # create export CSV append
+}
+
 
 # Start Transcript if requested
 If ($TranscriptOn -eq $true) {
@@ -25,10 +51,28 @@ If ($TranscriptOn -eq $true) {
 # loop accounts
 
 # Get account primary mailadres
-# check on domain suffix
-#   if okay, then set value UPN = PrimaryMail
-#   if not okay, error handling
+ForEach ($Account in $Accounts){
+    # Does it have a mailbox? Get-ADUser -LDAPFilter "(msExchMailboxGuid=*)"
+    $ModifyUser = Get-ADUser -Identity $Account -Properties 'ProxyAddresses'
+    [String]$PrimaryAddress = $ModifyUser.'ProxyAddresses' -clike 'SMTP:*'
+
+    # check on domain suffix
+    # if okay, then set value UPN = PrimaryMail
+    # if not okay, error handling  
+    ForEach ($UPNSuffix in $UPNSuffixes) {
+        $Check = $UPNSuffix -clike $PrimaryAddress
+        Write-Output "$PrimaryAddress : $UPNSuffix is $Check"
+    }
+
+    $Okay = Set-ADUser -Identity $Account -UserPrincipalName $PrimaryAddress
+    Write-Output "$Account has now UPN $PrimaryAddress"
+}
+
 # export CSV 
 #  append UPN, PrimaryMail, SamAccountname of processed account
 
 # end loop
+
+# Clean up 
+Remove-Module ActiveDirectory
+Stop-Transcript
