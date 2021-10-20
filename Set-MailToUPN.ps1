@@ -2,25 +2,24 @@
 # Required imports UPNSuffix.txt and Accounts.txt
 # 
 
-
 Param(
     [switch]$TranscriptOn
 )
 
 # User ActiveDirectory
 $Check = Get-Command -Module ActiveDirectory
-If ($Check -eq $null){
-    Write-Output "Error: Active Directory PowerShell module is not installed on this machine"
-    Exit
+If ($Null -eq $Check){
+    Write-Output "Error: Active Directory PowerShell module is not installed on this machine. Stopping."
+    Break
 } else {
     Import-Module ActiveDirectory
 }
 
-
 # check allowed UPN suffix, commandline multivalued
 $UPNSuffixes = Import-CSV -Path "UPNSuffix.txt"
+Write-Output "Checking UPN Suffixes"
 ForEach ($UPNSuffix in $UPNSuffixes) {
-    Write-Output "Checking $UPNSuffix"
+    Write-Output $UPNSuffix
 }
 
 
@@ -31,8 +30,9 @@ $Accounts = Import-CSV -Path "Accounts.txt"
 # Export current account settings (backup)
 #   Current UPN, SamAccountname, PrimaryMail
 ForEach ($Account in $Accounts){
-    
-    Get-ADUser -Identity $Account -Properties 'ProxyAddresses'
+    $Identity = [String]$Account.SamAccountname
+    Write-Output "Identity is $Identity"
+    Get-ADUser -Identity $Identity -Properties 'ProxyAddresses'
 
 
 # create export CSV append
