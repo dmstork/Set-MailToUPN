@@ -15,6 +15,17 @@ If ($Null -eq $Check){
     Import-Module ActiveDirectory
 }
 
+# Start Transcript if requested
+If ($TranscriptOn -eq $true) {
+    # Defining logtime variable to be used in logging/default output folder
+    $LogTime = Get-Date -Format "yyyyMMdd_hhmm_ss"
+
+    # Initialize logging
+    $TranscriptFile = "SetMailToUPN_"+$LogTime+".txt"
+    Start-Transcript -Path $TranscriptFile
+}
+
+# loop accounts
 # check allowed UPN suffix, commandline multivalued
 $UPNSuffixes = Import-CSV -Path "UPNSuffix.txt"
 Write-Output "Checking UPN Suffixes"
@@ -29,33 +40,29 @@ $Accounts = Import-CSV -Path "Accounts.txt"
 
 # Export current account settings (backup)
 #   Current UPN, SamAccountname, PrimaryMail
+Write-Output "SamAccountName, UserPrincipalName, PrimarySMTPAddress"
 ForEach ($Account in $Accounts){
     $Identity = [String]$Account.SamAccountname
-    Write-Output "Identity is $Identity"
-    Get-ADUser -Identity $Identity -Properties 'ProxyAddresses'
+    # Write-Output "Identity is $Identity"
+    $PrimaryAddress = Get-ADUser -Identity $Identity -Properties 'ProxyAddresses' | Select -Expand proxyAddresses | Where {$_ -clike "SMTP:*"}
+    $PrimaryAddress - $PrimaryAddress.SubString(5)
+    $UserPrincipalName = [String]$Account.UserPrincipalName
+    
+    Write-Output "$Identity $PrimaryAddress $UserPrincipalName"
 
 
 # create export CSV append
 }
 
 
-# Start Transcript if requested
-If ($TranscriptOn -eq $true) {
-    # Defining logtime variable to be used in logging/default output folder
-    $LogTime = Get-Date -Format "yyyyMMdd_hhmm_ss"
 
-    # Initialize logging
-    $TranscriptFile = "SetMailToUPN_"+$LogTime+".txt"
-    Start-Transcript -Path $TranscriptFile
-}
-# loop accounts
+
 
 # Get account primary mailadres
 ForEach ($Account in $Accounts){
     # Does it have a mailbox? Get-ADUser -LDAPFilter "(msExchMailboxGuid=*)"
-    $ModifyUser = Get-ADUser -Identity $Account -Properties 'ProxyAddresses'
-    [String]$PrimaryAddress = $ModifyUser.'ProxyAddresses' -clike 'SMTP:*'
-
+    $PrimaryAddress = Get-ADUser -Identity $Account -Properties 'ProxyAddresses' | Select -Expand proxyAddresses | Where {$_ -clike "SMTP:*"}
+    
     # check on domain suffix
     # if okay, then set value UPN = PrimaryMail
     # if not okay, error handling  
