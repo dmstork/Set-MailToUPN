@@ -63,6 +63,7 @@ ForEach ($Account in $Accounts){
 ForEach ($Account in $Accounts){
     # Does it have a mailbox? Get-ADUser -LDAPFilter "(msExchMailboxGuid=*)"
     $Identity = [String]$Account.SamAccountname
+    $Identity = [String]$Identity
     $PrimaryAddress = Get-ADUser -Identity $Identity -Properties 'ProxyAddresses' | Select -Expand proxyAddresses | Where {$_ -clike "SMTP:*"}
     $PrimaryAddress = [String]$PrimaryAddress.SubString(5)
     $UserPrincipalName = [String]$Account.UserPrincipalName
