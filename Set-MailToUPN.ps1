@@ -72,7 +72,7 @@ ForEach ($Account in $Accounts){
     # if not okay, error handling  
     ForEach ($UPNSuffix in $UPNSuffixes) {
         $UPNSuffix = [String]$UPNSuffix.UPNSuffix
-        $Check = $PrimaryAddress -clike $UPNSuffix
+        $Check = $PrimaryAddress -like "*$UPNSuffix"
         Write-Output "$PrimaryAddress : $UPNSuffix is $Check"
     }
 
