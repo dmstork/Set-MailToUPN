@@ -71,7 +71,7 @@ ForEach ($Account in $Accounts){
     # if okay, then set value UPN = PrimaryMail
     # if not okay, error handling  
     ForEach ($UPNSuffix in $UPNSuffixes) {
-        $UPNSuffix = [String]$UPNSuffix
+        $UPNSuffix = [String]$UPNSuffix.UPNSuffix
         $Check = $UPNSuffix -clike $PrimaryAddress
         Write-Output "$PrimaryAddress : $UPNSuffix is $Check"
     }
