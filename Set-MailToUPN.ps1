@@ -45,10 +45,10 @@ ForEach ($Account in $Accounts){
     $Identity = [String]$Account.SamAccountname
     # Write-Output "Identity is $Identity"
     $PrimaryAddress = Get-ADUser -Identity $Identity -Properties 'ProxyAddresses' | Select -Expand proxyAddresses | Where {$_ -clike "SMTP:*"}
-    $PrimaryAddress - $PrimaryAddress.SubString(5)
+    $PrimaryAddress = $PrimaryAddress.SubString(5)
     $UserPrincipalName = [String]$Account.UserPrincipalName
-    
-    Write-Output "$Identity $PrimaryAddress $UserPrincipalName"
+
+    Write-Output "$Identity $UserPrincipalName $PrimaryAddress "
 
 
 # create export CSV append
@@ -62,7 +62,7 @@ ForEach ($Account in $Accounts){
 ForEach ($Account in $Accounts){
     # Does it have a mailbox? Get-ADUser -LDAPFilter "(msExchMailboxGuid=*)"
     $PrimaryAddress = Get-ADUser -Identity $Account -Properties 'ProxyAddresses' | Select -Expand proxyAddresses | Where {$_ -clike "SMTP:*"}
-    
+    $PrimaryAddress = $PrimaryAddress.SubString(5)
     # check on domain suffix
     # if okay, then set value UPN = PrimaryMail
     # if not okay, error handling  
@@ -71,7 +71,7 @@ ForEach ($Account in $Accounts){
         Write-Output "$PrimaryAddress : $UPNSuffix is $Check"
     }
 
-    $Okay = Set-ADUser -Identity $Account -UserPrincipalName $PrimaryAddress
+    $Okay = Set-ADUser -Identity $Account -UserPrincipalName $PrimaryAddress -Whatif
     Write-Output "$Account has now UPN $PrimaryAddress"
 }
 
@@ -82,4 +82,7 @@ ForEach ($Account in $Accounts){
 
 # Clean up 
 Remove-Module ActiveDirectory
-Stop-Transcript
+
+If ($TranscriptOn -eq $true) {
+    Stop-Transcript
+}
