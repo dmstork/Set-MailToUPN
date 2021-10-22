@@ -40,6 +40,7 @@ $Accounts = Import-CSV -Path "Accounts.txt"
 
 # Export current account settings (backup)
 #   Current UPN, SamAccountname, PrimaryMail
+Write-Output "--"
 Write-Output "SamAccountName, UserPrincipalName, PrimarySMTPAddress"
 ForEach ($Account in $Accounts){
     $Identity = [String]$Account.SamAccountname
@@ -61,8 +62,10 @@ ForEach ($Account in $Accounts){
 # Get account primary mailadres
 ForEach ($Account in $Accounts){
     # Does it have a mailbox? Get-ADUser -LDAPFilter "(msExchMailboxGuid=*)"
+    $Identity = [String]$Account.SamAccountname
     $PrimaryAddress = Get-ADUser -Identity $Account -Properties 'ProxyAddresses' | Select -Expand proxyAddresses | Where {$_ -clike "SMTP:*"}
     $PrimaryAddress = $PrimaryAddress.SubString(5)
+    $UserPrincipalName = [String]$Account.UserPrincipalName
     # check on domain suffix
     # if okay, then set value UPN = PrimaryMail
     # if not okay, error handling  
