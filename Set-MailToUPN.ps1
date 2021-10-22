@@ -63,13 +63,14 @@ ForEach ($Account in $Accounts){
 ForEach ($Account in $Accounts){
     # Does it have a mailbox? Get-ADUser -LDAPFilter "(msExchMailboxGuid=*)"
     $Identity = [String]$Account.SamAccountname
-    $PrimaryAddress = Get-ADUser -Identity $Account -Properties 'ProxyAddresses' | Select -Expand proxyAddresses | Where {$_ -clike "SMTP:*"}
+    $PrimaryAddress = Get-ADUser -Identity $Identity -Properties 'ProxyAddresses' | Select -Expand proxyAddresses | Where {$_ -clike "SMTP:*"}
     $PrimaryAddress = $PrimaryAddress.SubString(5)
     $UserPrincipalName = [String]$Account.UserPrincipalName
     # check on domain suffix
     # if okay, then set value UPN = PrimaryMail
     # if not okay, error handling  
     ForEach ($UPNSuffix in $UPNSuffixes) {
+        $UPNSuffix = [String]$UPNSuffix
         $Check = $UPNSuffix -clike $PrimaryAddress
         Write-Output "$PrimaryAddress : $UPNSuffix is $Check"
     }
