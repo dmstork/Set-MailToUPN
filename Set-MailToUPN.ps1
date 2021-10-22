@@ -27,12 +27,22 @@ If ($TranscriptOn -eq $true) {
 
 # loop accounts
 # check allowed UPN suffix, commandline multivalued
-$UPNSuffixes = Import-CSV -Path "UPNSuffix.txt"
-Write-Output "Checking UPN Suffixes"
-ForEach ($UPNSuffix in $UPNSuffixes) {
+#$UPNSuffixes = Import-CSV -Path "UPNSuffix.txt"
+#Write-Output "Checking UPN Suffixes"
+#ForEach ($UPNSuffix in $UPNSuffixes) {
+#    Write-Output $UPNSuffix
+#}
+
+# alternative is via Get-ADForest domains & upnsuffixes
+$ADForest = Get-ADForest
+$Domains = $ADForest.Domains
+$UPNSuffixes = $ADForest.UPNSuffixes
+ForEach ($Domain in $Domains){
+    Write-Output $Domain
+}
+ForEach ($UPNSuffix in $UPNSuffixes){
     Write-Output $UPNSuffix
 }
-
 
 
 # Import CSV with accounts, column SamAccountname
