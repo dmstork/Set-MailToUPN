@@ -7,15 +7,10 @@ If ($Null -eq $Check){
     Import-Module ActiveDirectory
 }
 
+
 # Import CSV with accounts, column SamAccountname
 #$Accounts = Import-CSV -Path "Accounts.txt"
 #$Accounts = Import-CSV -Path "export.txt"
-
-
-# is it synced? mS-DS-ConsistencyGuid
-# Does it have an on-prem mailbox? msExchMailboxGuid
-# Does it have mailadresses? proxyAddresses (iffy)
-
 $Accounts =  Get-ADUser -Filter "msExchMailboxGuid -like '*'" | Where {($_.DistinguishedName -notlike "*CN=Microsoft Exchange System Objects*") -xor ($_.DistinguishedName -notlike "CN=DiscoverySearchMailbox {*") -xor ($_.DistinguishedName -notlike "CN=FederatedEmail.*") -xor ($_.DistinguishedName -notlike "CN=Migration.*") -xor ($_.DistinguishedName -notlike "CN=SystemMailbox{*")}
 
 $FoundAccounts = @()
@@ -56,11 +51,12 @@ ForEach ($Account in $Accounts){
         $NoPrimarySMTP += $NoSMTPUser
     }
    
-
-# create export CSV append
 }
 
-$FoundAccounts #| Export-CSV -NoTypeInformation -Path export.txt
 
-Write-Output "No Primary SMTP found:"
-$NoPrimarySMTP
+#Get date for export
+$LogTime = Get-Date -Format "yyyyMMdd"
+
+#Export to files
+$FoundAccounts | Export-CSV -NoTypeInformation -Path $logtime"Mailboxes.txt"
+$NoPrimarySMTP | Export-CSV -NoTypeInformation -Path $logtime"NoPrimarySMTP.txt"
