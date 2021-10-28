@@ -11,7 +11,12 @@ If ($Null -eq $Check){
 # Import CSV with accounts, column SamAccountname
 #$Accounts = Import-CSV -Path "Accounts.txt"
 #$Accounts = Import-CSV -Path "export.txt"
-$Accounts =  Get-ADUser -Filter "msExchMailboxGuid -like '*'" | Where {($_.DistinguishedName -notlike "*CN=Microsoft Exchange System Objects*") -xor ($_.DistinguishedName -notlike "CN=DiscoverySearchMailbox {*") -xor ($_.DistinguishedName -notlike "CN=FederatedEmail.*") -xor ($_.DistinguishedName -notlike "CN=Migration.*") -xor ($_.DistinguishedName -notlike "CN=SystemMailbox{*")}
+
+# Getting all on-premises mailbox enabled accounts, filtering system, discovery, federation mailboxes 
+# Alos filters to get only usermailboxes based on msExchRecipientTypeDetails (if mailbox created correctly...)
+# $Accounts =  Get-ADUser -Filter "msExchMailboxGuid -like '*'" | Where {($_.DistinguishedName -notlike "*CN=Microsoft Exchange System Objects*") -xor ($_.DistinguishedName -notlike "CN=DiscoverySearchMailbox {*") -xor ($_.DistinguishedName -notlike "CN=FederatedEmail.*") -xor ($_.DistinguishedName -notlike "CN=Migration.*") -xor ($_.DistinguishedName -notlike "CN=SystemMailbox{*")}
+
+$Accounts = Get-ADUser -Filter 'msExchRecipientTypeDetails -like 1'
 
 $FoundAccounts = @()
 $NoPrimarySMTP = @()
