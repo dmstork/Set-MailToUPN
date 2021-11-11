@@ -12,11 +12,28 @@ If ($Null -eq $Check){
 #$Accounts = Import-CSV -Path "Accounts.txt"
 #$Accounts = Import-CSV -Path "export.txt"
 
+# Import CSV with SearchBase
+Try {
+    $SearchBases = Import-CSV "searchbases.txt"
+} Catch {
+    Write-Output "No Searchbases found"
+    $SearchBases = $Null
+}
+
+
 # Getting all on-premises mailbox enabled accounts, filtering system, discovery, federation mailboxes 
 # Alos filters to get only usermailboxes based on msExchRecipientTypeDetails (if mailbox created correctly...)
 # $Accounts =  Get-ADUser -Filter "msExchMailboxGuid -like '*'" | Where {($_.DistinguishedName -notlike "*CN=Microsoft Exchange System Objects*") -xor ($_.DistinguishedName -notlike "CN=DiscoverySearchMailbox {*") -xor ($_.DistinguishedName -notlike "CN=FederatedEmail.*") -xor ($_.DistinguishedName -notlike "CN=Migration.*") -xor ($_.DistinguishedName -notlike "CN=SystemMailbox{*")}
 
-$Accounts = Get-ADUser -Filter 'msExchRecipientTypeDetails -like 1'
+If ($SearchBases -eq $Null){
+    $Accounts = Get-ADUser -Filter 'msExchRecipientTypeDetails -like 1'
+} Else {
+    ForEach ($SearchBase in $SearchBases) {
+    $Accounts += Get-ADUser -Filter 'msExchangeRecipientTypeDetails -like 1' -SearchBase $SearchBase
+    }
+}
+
+
 
 $FoundAccounts = @()
 $NoPrimarySMTP = @()
