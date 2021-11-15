@@ -1,5 +1,5 @@
 # 
-# Required imports UPNSuffix.txt and Accounts.txt
+# Required imports Mailboxes.txt with SamAccountName as minimal input column
 # 
 
 Param(
