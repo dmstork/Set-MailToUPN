@@ -59,7 +59,7 @@ ForEach ($Account in $Accounts){
             DistinguishedName = $DistinguishedName
         }
         
-        Write-Output "$Identity $UserPrincipalName $PrimaryAddress $DistinguishedName"
+        #Write-Output "$Identity $UserPrincipalName $PrimaryAddress $DistinguishedName"
         $CurrentAccounts += $CurrentUser
 
     } else {
@@ -92,7 +92,8 @@ ForEach ($Account in $Accounts){
         
         #Actually changing UPN
         Try {
-            Set-ADUser -Identity $Identity -UserPrincipalName $PrimaryAddress -WhatIf -ErrorLevel Continue           
+            Write-Output "Changing $Identity UPN to $PrimaryAddress"
+            Set-ADUser -Identity $Identity -UserPrincipalName $PrimaryAddress           
         } Catch {
             Write-Output "Error with $Identity and $PrimaryAddress "
         }
@@ -106,7 +107,7 @@ ForEach ($Account in $Accounts){
             DistinguishedName = $DistinguishedName
         }
         
-        Write-Output "$Identity $UserPrincipalName $PrimaryAddress $DistinguishedName"
+        #Write-Output "$Identity $UserPrincipalName $PrimaryAddress $DistinguishedName"
         $ChangedAccounts += $ChangedUser
 
     } else {
