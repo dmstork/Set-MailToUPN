@@ -25,75 +25,65 @@ If ($TranscriptOn -eq $true) {
     Start-Transcript -Path $TranscriptFile
 }
 
-# loop accounts
-# check allowed UPN suffix, commandline multivalued
-#$UPNSuffixes = Import-CSV -Path "UPNSuffix.txt"
-#Write-Output "Checking UPN Suffixes"
-#ForEach ($UPNSuffix in $UPNSuffixes) {
-#    Write-Output $UPNSuffix
-#}
-
-# alternative is via Get-ADForest domains & upnsuffixes
-$ADForest = Get-ADForest
-$Domains = $ADForest.Domains
-$UPNSuffixes = $ADForest.UPNSuffixes
-ForEach ($Domain in $Domains){
-    Write-Output $Domain
-}
-ForEach ($UPNSuffix in $UPNSuffixes){
-    Write-Output $UPNSuffix
-}
 
 
-# Import CSV with accounts, column SamAccountname
-$Accounts = Import-CSV -Path "Accounts.txt"
+# Import CSV with SamAccountName, UserPrincipalName and their primary SMTP. 
+# Information gathered by Get-MailToUPN.ps1 and manually verified. There are no checks whether SMTP is correct and UPN suffixes exist
+$Accounts = Import-CSV -Path "Mailboxes.txt"
+
+#Defining array for Export
+$CurrentAccounts = @()
+$CurrentNoPrimarySMTP = @()
 
 # Export current account settings (backup)
 #   Current UPN, SamAccountname, PrimaryMail
-Write-Output "--"
+Write-Output "Current attribute values exported"
 Write-Output "SamAccountName, UserPrincipalName, PrimarySMTPAddress"
+
 ForEach ($Account in $Accounts){
     $Identity = [String]$Account.SamAccountname
+    $DistinguishedName = [String]$Account.DistinguishedName
+
     # Write-Output "Identity is $Identity"
-    $PrimaryAddress = Get-ADUser -Identity $Identity -Properties 'ProxyAddresses' | Select -Expand proxyAddresses | Where {$_ -clike "SMTP:*"}
-    $PrimaryAddress = $PrimaryAddress.SubString(5)
-    $UserPrincipalName = [String]$Account.UserPrincipalName
+    $PrimaryAddress = Get-ADUser -Identity $Identity -Properties ProxyAddresses | Select-Object -Expand proxyAddresses | Where-Object {$_ -clike "SMTP:*"}
+    
+    If ($null -ne $PrimaryAddress){
+        $PrimaryAddress = $PrimaryAddress.SubString(5)
+        $UserPrincipalName = [String]$Account.UserPrincipalName
+    
+        $CurrentUser = [PSCustomObject] @{
+            SamAccountname = $Identity
+            UserPrincipalName = $UserPrincipalName
+            PrimaryAddress = $PrimaryAddress
+            DistinguishedName = $DistinguishedName
+        }
+        
+        Write-Output "$Identity $UserPrincipalName $PrimaryAddress $DistinguishedName"
+        $CurrentAccounts += $CurrentUser
 
-    Write-Output "$Identity $UserPrincipalName $PrimaryAddress "
+    } else {
 
-
-# create export CSV append
-}
-
-
-
-
-
-# Get account primary mailadres
-ForEach ($Account in $Accounts){
-    # Does it have a mailbox? Get-ADUser -LDAPFilter "(msExchMailboxGuid=*)"
-    $Identity = [String]$Account.SamAccountname
-    $Identity = [String]$Identity
-    $PrimaryAddress = Get-ADUser -Identity $Identity -Properties 'ProxyAddresses' | Select -Expand proxyAddresses | Where {$_ -clike "SMTP:*"}
-    $PrimaryAddress = [String]$PrimaryAddress.SubString(5)
-    $UserPrincipalName = [String]$Account.UserPrincipalName
-    # check on domain suffix
-    # if okay, then set value UPN = PrimaryMail
-    # if not okay, error handling  
-    ForEach ($UPNSuffix in $UPNSuffixes) {
-        $UPNSuffix = [String]$UPNSuffix.UPNSuffix
-        $Check = $PrimaryAddress -like "*$UPNSuffix"
-        Write-Output "$PrimaryAddress : $UPNSuffix is $Check"
+        $UserPrincipalName = [String]$Account.UserPrincipalName
+            
+        $NoSMTPUser = [PSCustomObject] @{
+            SamAccountname = $Identity
+            UserPrincipalName = $UserPrincipalName
+            DistinguishedName = $DistinguishedName
+        }
+        
+        $CurrentNoPrimarySMTP += $NoSMTPUser
     }
-
-    $Okay = Set-ADUser -Identity $Identity -UserPrincipalName $PrimaryAddress -Whatif
-    Write-Output "$Identity has now UPN $PrimaryAddress"
+   
 }
 
-# export CSV 
-#  append UPN, PrimaryMail, SamAccountname of processed account
+#Get date for export
+$LogTime = Get-Date -Format "yyyyMMdd"
 
-# end loop
+#Export to files
+$CurrentAccounts | Export-CSV -NoTypeInformation -Path $logtime"CurrentAccounts.txt"
+$CurrentNoPrimarySMTP | Export-CSV -NoTypeInformation -Path $logtime"CurrentNoPrimarySMTP.txt"
+
+
 
 # Clean up 
 Remove-Module ActiveDirectory
