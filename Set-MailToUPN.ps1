@@ -37,8 +37,9 @@ $CurrentNoPrimarySMTP = @()
 
 # Export current account settings (backup)
 #   Current UPN, SamAccountname, PrimaryMail
+
 Write-Output "Current attribute values exported"
-Write-Output "SamAccountName, UserPrincipalName, PrimarySMTPAddress"
+# Write-Output "SamAccountName, UserPrincipalName, PrimarySMTPAddress"
 
 ForEach ($Account in $Accounts){
     $Identity = [String]$Account.SamAccountname
@@ -76,13 +77,53 @@ ForEach ($Account in $Accounts){
    
 }
 
+Write-Output "Changing UPN to Primary SMTP"
+
+$ChangedAccounts = @()
+
+ForEach ($Account in $Accounts){
+    $Identity = [String]$Account.SamAccountname
+    $DistinguishedName = [String]$Account.DistinguishedName
+    $PrimaryAddress = Get-ADUser -Identity $Identity -Properties ProxyAddresses | Select-Object -Expand proxyAddresses | Where-Object {$_ -clike "SMTP:*"}
+    
+    If ($null -ne $PrimaryAddress){
+        $PrimaryAddress = $PrimaryAddress.SubString(5)
+        $UserPrincipalName = [String]$Account.UserPrincipalName
+        
+        #Actually changing UPN
+        Try {
+            Set-ADUser -Identity $Identity -UserPrincipalName $PrimaryAddress -WhatIf -ErrorLevel Continue           
+        } Catch {
+            Write-Output "Error with $Identity and $PrimaryAddress "
+        }
+
+        # Registering what has been changed
+        $UserPrincipalName = (Get-ADUser -Identity $Identity).UserPrincipalName
+        $ChangedUser = [PSCustomObject] @{
+            SamAccountname = $Identity
+            UserPrincipalName = $UserPrincipalName
+            PrimaryAddress = $PrimaryAddress
+            DistinguishedName = $DistinguishedName
+        }
+        
+        Write-Output "$Identity $UserPrincipalName $PrimaryAddress $DistinguishedName"
+        $ChangedAccounts += $ChangedUser
+
+    } else {
+        #If there is no Primary SMTP found
+        Write-Output "Error $Identity : No Primary SMTP found"
+    }
+   
+}
+
+
 #Get date for export
 $LogTime = Get-Date -Format "yyyyMMdd"
 
 #Export to files
 $CurrentAccounts | Export-CSV -NoTypeInformation -Path $logtime"CurrentAccounts.txt"
 $CurrentNoPrimarySMTP | Export-CSV -NoTypeInformation -Path $logtime"CurrentNoPrimarySMTP.txt"
-
+$ChangedAccounts | Export-CSV -NoTypeInformation -Path $logtime"ChangedAccounts.txt"
 
 
 # Clean up 
