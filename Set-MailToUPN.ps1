@@ -2,11 +2,21 @@
 # Required imports Mailboxes.txt with SamAccountName as minimal input column
 # 
 
+# Definition of possible parameters and switches
+# TranscriptOn will create a transcript file in the running folder
+# InputFile is the CSV with accounts that have to be changed.
 Param(
-    [switch]$TranscriptOn
+    [switch]$TranscriptOn,
+    # Specifies a path to one or more locations.
+    [Parameter(Mandatory=$false,
+               Position=0,
+               ValueFromPipeline=$true,
+               ValueFromPipelineByPropertyName=$true,
+               HelpMessage="Path CSV file with accounts to be processed")]
+    [ValidateNotNullOrEmpty()][string[]]$Path
 )
 
-# User ActiveDirectory
+# Check wether ActiveDirectory PowerShell module is installed
 $Check = Get-Command -Module ActiveDirectory
 If ($Null -eq $Check){
     Write-Output "Error: Active Directory PowerShell module is not installed on this machine. Stopping."
@@ -27,8 +37,10 @@ If ($TranscriptOn -eq $true) {
 
 
 
-# Import CSV with SamAccountName, UserPrincipalName and their primary SMTP. 
-# Information gathered by Get-MailToUPN.ps1 and manually verified. There are no checks whether SMTP is correct and UPN suffixes exist
+# Import CSV with SamAccountName, UserPrincipalName and PrimarySMTPAddress
+# Information can be gathered by Get-MailToUPN.ps1 and manually verified. 
+# There are no checks whether SMTP is correct and UPN suffixes exist
+
 $Accounts = Import-CSV -Path "Mailboxes.txt"
 
 #Defining array for Export
