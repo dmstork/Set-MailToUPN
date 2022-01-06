@@ -43,9 +43,9 @@ If ($TranscriptOn -eq $true) {
 Try {
     $Accounts = Import-CSV -Path $CSVFile
 } Catch {
-    Write-Output "Failed to import CSV File"
-    
+    Write-Output "Failed to import CSV File"  
 }
+
 # $Accounts = Import-CSV -Path "Mailboxes.txt"
 
 #Defining array for Export
