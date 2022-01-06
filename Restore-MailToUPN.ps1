@@ -1,4 +1,4 @@
-Simple script written by Dave Stork 
+# Simple script written by Dave Stork 
 # Mail: dmstork at stalpaert.nl
 # Twitter: @dmstork
 # 
