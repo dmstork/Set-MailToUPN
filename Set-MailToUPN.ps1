@@ -13,7 +13,7 @@ Param(
                ValueFromPipeline=$true,
                ValueFromPipelineByPropertyName=$true,
                HelpMessage="Path CSV file with accounts to be processed")]
-    [ValidateNotNullOrEmpty()][string[]]$Path
+    [ValidateNotNullOrEmpty()][string[]]$CSVFile
 )
 
 # Check wether ActiveDirectory PowerShell module is installed
@@ -40,8 +40,13 @@ If ($TranscriptOn -eq $true) {
 # Import CSV with SamAccountName, UserPrincipalName and PrimarySMTPAddress
 # Information can be gathered by Get-MailToUPN.ps1 and manually verified. 
 # There are no checks whether SMTP is correct and UPN suffixes exist
-
-$Accounts = Import-CSV -Path "Mailboxes.txt"
+Try {
+    $Accounts = Import-CSV -Path $CSVFile
+} Catch {
+    Write-Output "Failed to import CSV File"
+    
+}
+# $Accounts = Import-CSV -Path "Mailboxes.txt"
 
 #Defining array for Export
 $CurrentAccounts = @()
