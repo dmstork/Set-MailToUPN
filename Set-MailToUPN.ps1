@@ -8,12 +8,13 @@
 Param(
     [switch]$TranscriptOn,
     # Specifies a path to one or more locations.
-    [Parameter(Mandatory=$false,
-               Position=0,
-               ValueFromPipeline=$true,
-               ValueFromPipelineByPropertyName=$true,
-               HelpMessage="Path CSV file with accounts to be processed")]
-    [ValidateNotNullOrEmpty()][string[]]$CSVFile
+    #[Parameter(Mandatory=$false,
+    #           Position=0,
+    #           ValueFromPipeline=$true,
+    #           ValueFromPipelineByPropertyName=$true,
+    #           HelpMessage="Path CSV file with accounts to be processed")]
+    #[ValidateNotNullOrEmpty()]
+    [string]$CSVFile
 )
 
 # Check wether ActiveDirectory PowerShell module is installed
