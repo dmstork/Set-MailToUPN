@@ -42,9 +42,10 @@ If ($TranscriptOn -eq $true) {
 # Information can be gathered by Get-MailToUPN.ps1 and manually verified. 
 # There are no checks whether SMTP is correct and UPN suffixes exist
 Try {
-    $Accounts = Import-CSV -Path $CSVFile
+    $Accounts = Import-CSV -Path $CSVFile -ErrorAction Continue
 } Catch {
-    Write-Output "Failed to import CSV File"  
+    Write-Error "Failed to import CSV File" -ErrorAction Stop
+
 }
 
 # $Accounts = Import-CSV -Path "Mailboxes.txt"
