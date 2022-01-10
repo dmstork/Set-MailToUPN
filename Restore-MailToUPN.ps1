@@ -87,10 +87,10 @@ ForEach ($Account in $Accounts){
 
 
 #Get date for export
-$LogTime = Get-Date -Format "yyyyMMdd"
+$LogTime = Get-Date -Format "yyyyMMdd_hhmm"
 
 #Export the performed action to a CSV file
-$RestoredAccounts | Export-CSV -NoTypeInformation -Path $logtime"RestoredAccounts.txt"
+$RestoredAccounts | Export-CSV -NoTypeInformation -Path $logtime"_RestoredAccounts.txt"
 
 
 # Clean up PS Modules

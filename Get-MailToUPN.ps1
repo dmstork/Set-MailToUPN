@@ -79,8 +79,8 @@ ForEach ($Account in $Accounts){
 }
 
 #Get date for export
-$LogTime = Get-Date -Format "yyyyMMdd"
+$LogTime = Get-Date -Format "yyyyMMdd_hhmm"
 
 #Export to files
-$FoundAccounts | Export-CSV -NoTypeInformation -Path $logtime"Mailboxes.txt"
-$NoPrimarySMTP | Export-CSV -NoTypeInformation -Path $logtime"NoPrimarySMTP.txt"
+$FoundAccounts | Export-CSV -NoTypeInformation -Path $logtime"_Mailboxes.txt"
+$NoPrimarySMTP | Export-CSV -NoTypeInformation -Path $logtime"_NoPrimarySMTP.txt"

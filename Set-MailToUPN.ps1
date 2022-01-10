@@ -154,12 +154,12 @@ ForEach ($Account in $Accounts){
 
 
 #Get date for export
-$LogTime = Get-Date -Format "yyyyMMdd"
+$LogTime = Get-Date -Format "yyyyMMdd_hhmm"
 
 #Exporting all arrays to CSV files
-$CurrentAccounts | Export-CSV -NoTypeInformation -Path $logtime"OriginalStateAccounts.txt"
-$CurrentNoPrimarySMTP | Export-CSV -NoTypeInformation -Path $logtime"CurrentNoPrimarySMTP.txt"
-$ChangedAccounts | Export-CSV -NoTypeInformation -Path $logtime"ChangedAccounts.txt"
+$CurrentAccounts | Export-CSV -NoTypeInformation -Path $logtime"_OriginalStateAccounts.txt"
+$CurrentNoPrimarySMTP | Export-CSV -NoTypeInformation -Path $logtime"_CurrentNoPrimarySMTP.txt"
+$ChangedAccounts | Export-CSV -NoTypeInformation -Path $logtime"_ChangedAccounts.txt"
 
 
 # Clean up PS Modules
