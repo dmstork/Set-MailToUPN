@@ -15,7 +15,7 @@
 Param(
     # Mandatory. Specifies a filepath to CSV file with accounts to be restored to original state.
     # You can use the OriginalStateAccounts from the Set-MailToUPN Script.
-    [Parameter(Mandatory=$True,
+    [Parameter(Mandatory=$False,
              ValueFromPipeline=$true,
              ValueFromPipelineByPropertyName=$true,
              HelpMessage="Path CSV file with accounts to be processed")]
