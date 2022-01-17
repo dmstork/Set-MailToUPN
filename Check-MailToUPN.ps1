@@ -4,9 +4,10 @@
 # 
 # Provided as is, use at own risk.
 #
-# Checks AD user accounts with mailbox whether their AD UPN corresponds with their primary SMTP
+# Checks AD user accounts whether their AD UPN corresponds with their primary SMTP
 # The AD UPN = Primary SMTP is the recommended configuration as this is assumed by Microsoft 365 
 # Services and apps and increases the user experience positivly.
+# However, it is possibe
 #
 # .KNOWNISSUES
 # Option to search only specific OU's is still in development and might not work
@@ -45,10 +46,6 @@ If ($Null -eq $Check){
 #    }
 #}
 
-# Getting all on-premises mailbox enabled accounts, filtering system, discovery, federation mailboxes 
-# Also filters to get only usermailboxes based on msExchRecipientTypeDetails (if mailbox created correctly...)
-# $Accounts =  Get-ADUser -Filter "msExchMailboxGuid -like '*'" | Where {($_.DistinguishedName -notlike "*CN=Microsoft Exchange System Objects*") -xor ($_.DistinguishedName -notlike "CN=DiscoverySearchMailbox {*") -xor ($_.DistinguishedName -notlike "CN=FederatedEmail.*") -xor ($_.DistinguishedName -notlike "CN=Migration.*") -xor ($_.DistinguishedName -notlike "CN=SystemMailbox{*")}
-# But another approach is to limit searches based on SearchBase. A loop is required because you can only define one at a time in Get-ADUser.
 
 
 #If ($Null -eq $SearchBases){
