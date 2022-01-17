@@ -35,7 +35,7 @@ If ($Null -eq $Check){
 
 # Import CSV with SearchBase
 Try {
-    $SearchBases = Import-CSV $SearchBaseFile -ErrorAction Continue
+    $SearchBases = Import-CSV $SearchBaseFile
 } Catch {
     Write-Output "No Searchbases found"
     $SearchBases = $Null
