@@ -34,14 +34,16 @@ If ($Null -eq $Check){
 
 
 # Import CSV with SearchBase
-If ($null -ne $SearchBaseFile){
-    Try {
-        $SearchBases = Import-CSV $SearchBaseFile
-    } Catch {
-        Write-Output "No Searchbases found"
-        $SearchBases = $Null
-    }
-}
+# Temporary commented out, will fix later?
+
+#If ($null -ne $SearchBaseFile){
+#    Try {
+#        $SearchBases = Import-CSV $SearchBaseFile
+#    } Catch {
+#        Write-Output "No Searchbases found"
+#        $SearchBases = $Null
+#    }
+#}
 
 # Getting all on-premises mailbox enabled accounts, filtering system, discovery, federation mailboxes 
 # Also filters to get only usermailboxes based on msExchRecipientTypeDetails (if mailbox created correctly...)
@@ -49,14 +51,14 @@ If ($null -ne $SearchBaseFile){
 # But another approach is to limit searches based on SearchBase. A loop is required because you can only define one at a time in Get-ADUser.
 
 
-If ($Null -eq $SearchBases){
-    $Accounts = Get-ADUser -Filter 'msExchRecipientTypeDetails -like 1'
-} Else {
-    ForEach ($SearchBase in $SearchBases) {
-    Write-Output $SearchBase
-    $Accounts += Get-ADUser -Filter 'msExchangeRecipientTypeDetails -like 1' -SearchBase $SearchBase.SearchBase -SearchScope Subtree
-    }
-}
+#If ($Null -eq $SearchBases){
+#    $Accounts = Get-ADUser -Filter 'msExchRecipientTypeDetails -like 1'
+#} Else {
+#    ForEach ($SearchBase in $SearchBases) {
+#    Write-Output $SearchBase
+#    $Accounts += Get-ADUser -Filter 'msExchangeRecipientTypeDetails -like 1' -SearchBase $SearchBase.SearchBase -SearchScope Subtree
+#    }
+#}
 
 # Sorting accounts based on SamAccountName
 $Accounts = $Accounts | Sort-Object -Property SamAccountName
