@@ -86,7 +86,7 @@ ForEach ($Account in $Accounts){
         
         # If the PrimarySMTP corresponds with UserPrincipalName, it should be stored in CorrectAccounts
         If ($PrimaryAddress -eq $UserPrincipalName){
-            $CorrectAccounts = +$CurrentUser
+            $CorrectAccounts += $CurrentUser
         # If the PrimarySMTP does NOT correspond with UserPrincipalName, it should be store in MismatchAccounts
         } elseif ($PrimaryAddress -ne $UserPrincipalName){
             $MismatchAccounts += $CurrentUser
