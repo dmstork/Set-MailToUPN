@@ -60,6 +60,11 @@ If ($Null -eq $Check){
 #    }
 #}
 
+Try {
+    $Accounts = Get-ADUser -Filter * -ErrorAction Continue
+} catch {
+    Write-Output "Could not get AD Users"
+}
 # Sorting accounts based on SamAccountName
 $Accounts = $Accounts | Sort-Object -Property SamAccountName
 
@@ -119,3 +124,6 @@ $LogTime = Get-Date -Format "yyyyMMdd_hhmm"
 $MismatchAccounts | Export-CSV -NoTypeInformation -Path $Logtime"_MismatchAccounts.txt"
 $CorrectAccounts | Export-CSV -NoTypeInformation -Path $LogTime"_CorrectAccounts.txt" 
 $NoPrimarySMTP | Export-CSV -NoTypeInformation -Path $Logtime"_NoPrimarySMTP.txt"
+
+# Clean up PS Modules
+Remove-Module ActiveDirectory

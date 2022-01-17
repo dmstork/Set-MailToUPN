@@ -100,3 +100,6 @@ $LogTime = Get-Date -Format "yyyyMMdd_hhmm"
 #Export to files
 $FoundAccounts | Export-CSV -NoTypeInformation -Path $logtime"_Mailboxes.txt"
 $NoPrimarySMTP | Export-CSV -NoTypeInformation -Path $logtime"_NoPrimarySMTP.txt"
+
+# Clean up PS Modules
+Remove-Module ActiveDirectory
