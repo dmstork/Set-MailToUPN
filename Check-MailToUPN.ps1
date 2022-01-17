@@ -34,11 +34,13 @@ If ($Null -eq $Check){
 
 
 # Import CSV with SearchBase
-Try {
-    $SearchBases = Import-CSV $SearchBaseFile
-} Catch {
-    Write-Output "No Searchbases found"
-    $SearchBases = $Null
+If ($null -ne $SearchBaseFile){
+    Try {
+        $SearchBases = Import-CSV $SearchBaseFile
+    } Catch {
+        Write-Output "No Searchbases found"
+        $SearchBases = $Null
+    }
 }
 
 # Getting all on-premises mailbox enabled accounts, filtering system, discovery, federation mailboxes 
